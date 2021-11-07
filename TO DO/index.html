@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TO DO LIST</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.4.6/tailwind.min.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="icon" href="favicon.jpg">
+  </head>
+  <body>
+    <!-- partial:index.partial.html -->
+    <script
+      src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
+      defer
+    ></script>
+    <div x-data="todo()">
+      <div
+        id="todo-app"
+        class="glass-bg rounded-md container mx-auto mt-10 shadow-2xl"
+      >
+        <!--     TODO NAV -->
+        <div
+          class="
+            rounded-t-md
+            todo-nav
+            nav-color
+            p-4
+            mb-3
+            flex
+            items-center
+            justify-between
+          "
+        >
+          <h1
+            class="font-bold text-white text-xl leading-tight"
+            style="color: #000000; font-size: 2.5rem"
+          >
+            TODO APP
+            <span
+              class="block text-sm font-semibold text-blue-900"
+              style="font-size: 1.5rem"
+              >Just do it!</span
+            >
+          </h1>
+          <!--       TODO NAV - ADD TODO -->
+          <div class="text-sm">
+            <div class="rounded-full" title="create to-do">
+              <svg
+                @click="showAddModal"
+                class="cursor-pointer transform hover:scale-110"
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="30"
+                height="30"
+                viewBox="0 0 172 172"
+                style="fill: #000000"
+              >
+                <g
+                  fill="none"
+                  fill-rule="nonzero"
+                  stroke="none"
+                  stroke-width="1"
+                  stroke-linecap="butt"
+                  stroke-linejoin="miter"
+                  stroke-miterlimit="10"
+                  stroke-dasharray=""
+                  stroke-dashoffset="0"
+                  font-family="none"
+                  font-weight="none"
+                  font-size="none"
+                  text-anchor="none"
+                  style="mix-blend-mode: normal"
+                >
+                  <path d="M0,172v-172h172v172z" fill="none"></path>
+                  <g fill="#ffffff">
+                    <path
+                      d="M86,17.2c-37.9948,0 -68.8,30.8052 -68.8,68.8c0,37.9948 30.8052,68.8 68.8,68.8c37.9948,0 68.8,-30.8052 68.8,-68.8c0,-37.9948 -30.8052,-68.8 -68.8,-68.8zM114.66667,91.73333h-22.93333v22.93333c0,3.17053 -2.56853,5.73333 -5.73333,5.73333c-3.1648,0 -5.73333,-2.5628 -5.73333,-5.73333v-22.93333h-22.93333c-3.1648,0 -5.73333,-2.5628 -5.73333,-5.73333c0,-3.17053 2.56853,-5.73333 5.73333,-5.73333h22.93333v-22.93333c0,-3.17053 2.56853,-5.73333 5.73333,-5.73333c3.1648,0 5.73333,2.5628 5.73333,5.73333v22.93333h22.93333c3.1648,0 5.73333,2.5628 5.73333,5.73333c0,3.17053 -2.56853,5.73333 -5.73333,5.73333z"
+                    ></path>
+                  </g>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <!--     TODO LIST BODY -->
+        <div class="todo-lists pb-2">
+          <div class="todo-list-title">
+            <template x-for="(title, index) in todoLists" :key="title.key">
+              <!--           TODO LISTS INSTANCE -->
+              <div
+                x-show="notShowTodos"
+                class="
+                  todo-hover
+                  cursor-default
+                  flex
+                  items-center
+                  py-1
+                  px-3
+                  text-lg
+                "
+              >
+                <!--             TODO TITLE -->
+                <div
+                  @click="istitleTabActive=title.key, notShowTodos=false,showTitleCache=title.title"
+                  class="flex-1"
+                >
+                  <span x-text="title.title" class="font-semibold"></span>
+                  <span
+                    x-text="`( ${title.todos.length} todos )`"
+                    class="text-sm black-05"
+                  ></span>
+                </div>
+                <!--             TODO LISTS DELETE INSTANCE -->
+                <div
+                  x-show="showTodosDeleteConfirmation"
+                  class="fixed top-0 left-0 w-full h-screen"
+                >
+                  <div style="box-shadow:rgb(59 57 57 / 40%) 2px 2px 10px"
+                    class="
+                      rounded-md
+                      container
+                      mx-auto
+                      mt-16
+                      bg-white
+                      w-4/12
+                      p-3
+                    "
+                    x-show="showTodosDeleteConfirmation"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform scale-90"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-300"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-90"
+                  >
+                    <div class="text-center mb-2" >Are you sure?</div>
+                    <div class="text-center">
+                      <span
+                        @click="deleteTodoList(index)"
+                        class="cursor-pointer mx-5 hover:text-red-600"
+                        >Yes</span
+                      >
+                      <span
+                        @click="showTodosDeleteConfirmation=false"
+                        class="cursor-pointer mx-5 hover:text-red-600"
+                        >No</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <span
+                  x-text="`${title.dateCreated}`"
+                  class="text-xs black-03 mr-1"
+                ></span>
+                <svg
+                  @click="showTodosDeleteConfirmation=true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  x="0px"
+                  y="0px"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 172 172"
+                  style="fill: #000000"
+                >
+                  <g
+                    fill="none"
+                    fill-rule="nonzero"
+                    stroke="none"
+                    stroke-width="1"
+                    stroke-linecap="butt"
+                    stroke-linejoin="miter"
+                    stroke-miterlimit="10"
+                    stroke-dasharray=""
+                    stroke-dashoffset="0"
+                    font-family="none"
+                    font-weight="none"
+                    font-size="none"
+                    text-anchor="none"
+                    style="mix-blend-mode: normal"
+                  >
+                    <path d="M0,172v-172h172v172z" fill="none"></path>
+                    <g fill="#578DAF">
+                      <path
+                        d="M71.66667,14.33333l-7.16667,7.16667h-35.83333v14.33333h114.66667v-14.33333h-35.83333l-7.16667,-7.16667zM35.83333,50.16667v93.16667c0,7.88333 6.45,14.33333 14.33333,14.33333h71.66667c7.88333,0 14.33333,-6.45 14.33333,-14.33333v-93.16667zM67.43945,71.66667l18.56055,18.56055l18.56055,-18.56055l10.10612,10.10612l-18.56055,18.56055l18.56055,18.56055l-10.10612,10.10612l-18.56055,-18.56055l-18.56055,18.56055l-10.10612,-10.10612l18.56055,-18.56055l-18.56055,-18.56055z"
+                      ></path>
+                    </g>
+                  </g>
+                </svg>
+              </div>
+            </template>
+          </div>
+          <!--       TITLE, CHECKALL, BACK OF TODOS -->
+          <div
+            class="flex items-center justify-between px-2"
+            x-show="!notShowTodos"
+          >
+            <template x-for="(todoList,index) in todoLists" :key="todoList.key">
+              <div
+                class="flex items-center"
+                x-show="istitleTabActive===todoList.key"
+              >
+                <svg
+                  @click="checkAllTodos(index)"
+                  x-show="!checkAllComputed(index)"
+                  xmlns="http://www.w3.org/2000/svg"
+                  x="0px"
+                  y="0px"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 172 172"
+                  style="fill: #000000"
+                >
+                  <g
+                    fill="none"
+                    fill-rule="nonzero"
+                    stroke="none"
+                    stroke-width="1"
+                    stroke-linecap="butt"
+                    stroke-linejoin="miter"
+                    stroke-miterlimit="10"
+                    stroke-dasharray=""
+                    stroke-dashoffset="0"
+                    font-family="none"
+                    font-weight="none"
+                    font-size="none"
+                    text-anchor="none"
+                    style="mix-blend-mode: normal"
+                  >
+                    <path d="M0,172v-172h172v172z" fill="none"></path>
+                    <g fill="#000000">
+                      <path
+                        d="M28.66667,14.33333c-7.91917,0 -14.33333,6.41417 -14.33333,14.33333v86c0,7.91917 6.41417,14.33333 14.33333,14.33333h86c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-86c0,-7.91917 -6.41417,-14.33333 -14.33333,-14.33333zM28.66667,28.66667h86v86h-86zM143.33333,43v100.33333h-100.33333v14.33333h100.33333c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-100.33333zM95.26628,45.09961l-30.76628,30.76628l-16.43294,-16.43295l-10.13411,10.13411l26.56706,26.56705l40.90039,-40.90039z"
+                      ></path>
+                    </g>
+                  </g>
+                </svg>
+                <svg
+                  @click="checkAllTodos(index)"
+                  x-show="checkAllComputed(index)"
+                  xmlns="http://www.w3.org/2000/svg"
+                  x="0px"
+                  y="0px"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 172 172"
+                  style="fill: #000000"
+                >
+                  <g
+                    fill="none"
+                    fill-rule="nonzero"
+                    stroke="none"
+                    stroke-width="1"
+                    stroke-linecap="butt"
+                    stroke-linejoin="miter"
+                    stroke-miterlimit="10"
+                    stroke-dasharray=""
+                    stroke-dashoffset="0"
+                    font-family="none"
+                    font-weight="none"
+                    font-size="none"
+                    text-anchor="none"
+                    style="mix-blend-mode: normal"
+                  >
+                    <path d="M0,172v-172h172v172z" fill="none"></path>
+                    <g fill="#578DAF">
+                      <path
+                        d="M28.66667,14.33333c-7.91917,0 -14.33333,6.41417 -14.33333,14.33333v86c0,7.91917 6.41417,14.33333 14.33333,14.33333h86c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-86c0,-7.91917 -6.41417,-14.33333 -14.33333,-14.33333zM100.33333,43c1.83467,0 3.66956,0.70211 5.06706,2.09961c2.795,2.795 2.795,7.33911 0,10.13411l-35.83333,35.83333c-2.795,2.80217 -7.33911,2.80217 -10.13411,0l-21.5,-21.5c-2.795,-2.795 -2.795,-7.33911 0,-10.13411c2.795,-2.795 7.33911,-2.795 10.13411,0l16.43294,16.43295l30.76628,-30.76628c1.3975,-1.3975 3.23239,-2.09961 5.06706,-2.09961zM150.5,43c-3.956,0 -7.16667,3.21067 -7.16667,7.16667v93.16667h-93.16667c-3.956,0 -7.16667,3.21067 -7.16667,7.16667c0,3.956 3.21067,7.16667 7.16667,7.16667h93.16667c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-93.16667c0,-3.956 -3.21067,-7.16667 -7.16667,-7.16667z"
+                      ></path>
+                    </g>
+                  </g>
+                </svg>
+                <div
+                  x-text="showTitleCache"
+                  class="text-2xl font-bold ml-2"
+                ></div>
+                <span
+                  x-text="`${todoList.dateCreated}`"
+                  class="text-xs black-03 ml-2"
+                ></span>
+              </div>
+            </template>
+            <div
+              @click="notShowTodos=true, istitleTabActive=0"
+              class="black-btn-blue inline px-2 my-1 cursor-default text-white"
+            >
+              BACK
+            </div>
+          </div>
+          <!--       TODOS -->
+          <template x-for="(todoList, index) in  todoLists" :key="todoList.key">
+            <div
+              class="todo-list mt-2"
+              x-show="istitleTabActive===todoList.key"
+            >
+              <div class="flex items-center justify-between mx-3 my-1">
+                <div class="flex items-center">
+                  <div class="mr-2 completed-remaining-text">
+                    Completed: <span x-text="showCompleted(todoList)"></span>
+                  </div>
+                  <div class="completed-remaining-text">
+                    Items left: <span x-text="showRemaining(todoList)"></span>
+                  </div>
+                </div>
+                <div>
+                  <div
+                    @click="openSelect=!openSelect"
+                    @click.away="openSelect=false"
+                    class="
+                      flex
+                      items-center
+                      justify-between
+                      bg-blue-100
+                      border border-blue-200
+                      w-32
+                      cursor-default
+                    "
+                  >
+                    <span x-text="selected" class="pl-1"></span>
+                    <span class="px-2 bg-blue-200">V</span>
+                  </div>
+                  <div class="relative">
+                    <div
+                      x-show="openSelect"
+                      class="
+                        absolute
+                        top-0
+                        right-0
+                        bg-white
+                        border border-blue-200
+                        w-full
+                      "
+                    >
+                      <div
+                        @click="selected='All'"
+                        class="cursor-pointer pl-1 hover:bg-blue-100"
+                      >
+                        All
+                      </div>
+                      <div
+                        @click="selected='Completed'"
+                        class="cursor-pointer pl-1 hover:bg-blue-100"
+                      >
+                        Completed
+                      </div>
+                      <div
+                        @click="selected='Remainings'"
+                        class="cursor-pointer pl-1 hover:bg-blue-100"
+                      >
+                        Remainings
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <template x-for="(todo, index) in filterTodos(todoList)">
+                <div
+                  @click.away="clickAway(todo)"
+                  class="todo-hover flex items-center justify-between px-3 py-2"
+                >
+                  <div class="flex-1" title="double click to edit">
+                    <svg
+                      class="inline"
+                      @click="todo.completed=true"
+                      x-show="!todo.completed"
+                      xmlns="http://www.w3.org/2000/svg"
+                      x="0px"
+                      y="0px"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 172 172"
+                      style="fill: #000000"
+                    >
+                      <g
+                        fill="none"
+                        fill-rule="nonzero"
+                        stroke="none"
+                        stroke-width="1"
+                        stroke-linecap="butt"
+                        stroke-linejoin="miter"
+                        stroke-miterlimit="10"
+                        stroke-dasharray=""
+                        stroke-dashoffset="0"
+                        font-family="none"
+                        font-weight="none"
+                        font-size="none"
+                        text-anchor="none"
+                        style="mix-blend-mode: normal"
+                      >
+                        <path d="M0,172v-172h172v172z" fill="none"></path>
+                        <g fill="#000000">
+                          <path
+                            d="M28.66667,14.33333c-7.91917,0 -14.33333,6.41417 -14.33333,14.33333v86c0,7.91917 6.41417,14.33333 14.33333,14.33333h86c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-86c0,-7.91917 -6.41417,-14.33333 -14.33333,-14.33333zM28.66667,28.66667h86v86h-86zM143.33333,43v100.33333h-100.33333v14.33333h100.33333c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-100.33333zM95.26628,45.09961l-30.76628,30.76628l-16.43294,-16.43295l-10.13411,10.13411l26.56706,26.56705l40.90039,-40.90039z"
+                          ></path>
+                        </g>
+                      </g>
+                    </svg>
+                    <svg
+                      class="inline"
+                      @click="todo.completed=false"
+                      x-show="todo.completed"
+                      xmlns="http://www.w3.org/2000/svg"
+                      x="0px"
+                      y="0px"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 172 172"
+                      style="fill: #000000"
+                    >
+                      <g
+                        fill="none"
+                        fill-rule="nonzero"
+                        stroke="none"
+                        stroke-width="1"
+                        stroke-linecap="butt"
+                        stroke-linejoin="miter"
+                        stroke-miterlimit="10"
+                        stroke-dasharray=""
+                        stroke-dashoffset="0"
+                        font-family="none"
+                        font-weight="none"
+                        font-size="none"
+                        text-anchor="none"
+                        style="mix-blend-mode: normal"
+                      >
+                        <path d="M0,172v-172h172v172z" fill="none"></path>
+                        <g fill="#578DAF">
+                          <path
+                            d="M28.66667,14.33333c-7.91917,0 -14.33333,6.41417 -14.33333,14.33333v86c0,7.91917 6.41417,14.33333 14.33333,14.33333h86c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-86c0,-7.91917 -6.41417,-14.33333 -14.33333,-14.33333zM100.33333,43c1.83467,0 3.66956,0.70211 5.06706,2.09961c2.795,2.795 2.795,7.33911 0,10.13411l-35.83333,35.83333c-2.795,2.80217 -7.33911,2.80217 -10.13411,0l-21.5,-21.5c-2.795,-2.795 -2.795,-7.33911 0,-10.13411c2.795,-2.795 7.33911,-2.795 10.13411,0l16.43294,16.43295l30.76628,-30.76628c1.3975,-1.3975 3.23239,-2.09961 5.06706,-2.09961zM150.5,43c-3.956,0 -7.16667,3.21067 -7.16667,7.16667v93.16667h-93.16667c-3.956,0 -7.16667,3.21067 -7.16667,7.16667c0,3.956 3.21067,7.16667 7.16667,7.16667h93.16667c7.91917,0 14.33333,-6.41417 14.33333,-14.33333v-93.16667c0,-3.956 -3.21067,-7.16667 -7.16667,-7.16667z"
+                          ></path>
+                        </g>
+                      </g>
+                    </svg>
+                    <span
+                      @click="todo.completed=!todo.completed"
+                      class="text-base cursor-default"
+                      x-text="todo.todo"
+                      x-show="!todo.showEdit"
+                    ></span>
+                    <input
+                      @keydown.enter="doneEdit(todo,index)"
+                      x-show="todo.showEdit"
+                      class="todos-edit outline-none bg-blue-100 px-1"
+                      type="text"
+                      x-model="todo.todo"
+                    />
+                  </div>
+                  <!--               DELETE TODO -->
+                  <div
+                    x-show="showTodoDeleteConfirmation"
+                    class="fixed top-0 left-0 w-full h-screen"
+                  >
+                    <div
+                      class="
+                        rounded-md
+                        container
+                        mx-auto
+                        mt-16
+                        bg-white
+                        w-4/12
+                        p-3
+                      "
+                      x-show="showTodoDeleteConfirmation"
+                      x-transition:enter="transition ease-out duration-300"
+                      x-transition:enter-start="opacity-0 transform scale-90"
+                      x-transition:enter-end="opacity-100 transform scale-100"
+                      x-transition:leave="transition ease-in duration-300"
+                      x-transition:leave-start="opacity-100 transform scale-100"
+                      x-transition:leave-end="opacity-0 transform scale-90"
+                    >
+                      <div class="text-center mb-2">Are you sure?</div>
+                      <div class="text-center">
+                        <span
+                          @click="deleteTodo(todoList.key,index)"
+                          class="cursor-pointer mx-5 hover:text-red-600"
+                          >Yes</span
+                        >
+                        <span
+                          @click="showTodoDeleteConfirmation=false"
+                          class="cursor-pointer mx-5 hover:text-red-600"
+                          >No</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <!--               @click="showEdit(todo,index)" -->
+                  <div class="mr-2">
+                    <svg
+                      @click="showEdit(todo,index)"
+                      x-show="!todo.showEdit"
+                      xmlns="http://www.w3.org/2000/svg"
+                      x="0px"
+                      y="0px"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 172 172"
+                      style="fill: #000000"
+                    >
+                      <g
+                        fill="none"
+                        fill-rule="nonzero"
+                        stroke="none"
+                        stroke-width="1"
+                        stroke-linecap="butt"
+                        stroke-linejoin="miter"
+                        stroke-miterlimit="10"
+                        stroke-dasharray=""
+                        stroke-dashoffset="0"
+                        font-family="none"
+                        font-weight="none"
+                        font-size="none"
+                        text-anchor="none"
+                        style="mix-blend-mode: normal"
+                      >
+                        <path d="M0,172v-172h172v172z" fill="none"></path>
+                        <g fill="#578DAF">
+                          <path
+                            d="M121.38542,7.61458l-93.61458,93.61458l-20.07227,63.07226l63.07227,-20.07226l93.61458,-93.61458c0,0 -0.71667,-15.05717 -14.33333,-28.66667c-13.61667,-13.61667 -28.66667,-14.33333 -28.66667,-14.33333zM124.07292,19.26042c7.68267,1.462 13.7993,4.71645 18.51855,9.56022c4.71925,4.84377 8.04111,11.27686 10.14811,19.10645l-12.98958,12.98958l-28.66667,-28.66667l10.30208,-10.30208zM35.67936,108.40983c0.08473,0.02134 8.61749,2.17868 17.1748,10.736c9.31667,8.6 10.75,16.48893 10.75,16.48893l0.30794,0.36393l-25.43327,8.18848l-10.722,-10.72201z"
+                          ></path>
+                        </g>
+                      </g>
+                    </svg>
+                    <svg
+                      x-show="todo.showEdit"
+                      @click="doneEdit(todo,index)"
+                      xmlns="http://www.w3.org/2000/svg"
+                      x="0px"
+                      y="0px"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 172 172"
+                      style="fill: #000000"
+                    >
+                      <g
+                        fill="none"
+                        fill-rule="nonzero"
+                        stroke="none"
+                        stroke-width="1"
+                        stroke-linecap="butt"
+                        stroke-linejoin="miter"
+                        stroke-miterlimit="10"
+                        stroke-dasharray=""
+                        stroke-dashoffset="0"
+                        font-family="none"
+                        font-weight="none"
+                        font-size="none"
+                        text-anchor="none"
+                        style="mix-blend-mode: normal"
+                      >
+                        <path d="M0,172v-172h172v172z" fill="none"></path>
+                        <g fill="#578DAF">
+                          <path
+                            d="M149.28546,31.29387l-11.86117,-8.0625c-3.28185,-2.22236 -7.77825,-1.36959 -9.97476,1.88642l-58.14303,85.74159l-26.71996,-26.71996c-2.79087,-2.79087 -7.33894,-2.79087 -10.12981,0l-10.15565,10.15565c-2.79087,2.79087 -2.79087,7.33894 0,10.15565l41.08774,41.08774c2.29988,2.29988 5.91767,4.05709 9.17368,4.05709c3.25601,0 6.53786,-2.04146 8.65685,-5.11658l69.97837,-103.23618c2.22235,-3.25601 1.36959,-7.72656 -1.91226,-9.94892z"
+                          ></path>
+                        </g>
+                      </g>
+                    </svg>
+                  </div>
+                  <svg
+                    @click="showTodoDeleteConfirmation=true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 172 172"
+                    style="fill: #000000"
+                  >
+                    <g
+                      fill="none"
+                      fill-rule="nonzero"
+                      stroke="none"
+                      stroke-width="1"
+                      stroke-linecap="butt"
+                      stroke-linejoin="miter"
+                      stroke-miterlimit="10"
+                      stroke-dasharray=""
+                      stroke-dashoffset="0"
+                      font-family="none"
+                      font-weight="none"
+                      font-size="none"
+                      text-anchor="none"
+                      style="mix-blend-mode: normal"
+                    >
+                      <path d="M0,172v-172h172v172z" fill="none"></path>
+                      <g fill="#578DAF">
+                        <path
+                          d="M71.66667,14.33333l-7.16667,7.16667h-35.83333v14.33333h114.66667v-14.33333h-35.83333l-7.16667,-7.16667zM35.83333,50.16667v93.16667c0,7.88333 6.45,14.33333 14.33333,14.33333h71.66667c7.88333,0 14.33333,-6.45 14.33333,-14.33333v-93.16667zM67.43945,71.66667l18.56055,18.56055l18.56055,-18.56055l10.10612,10.10612l-18.56055,18.56055l18.56055,18.56055l-10.10612,10.10612l-18.56055,-18.56055l-18.56055,18.56055l-10.10612,-10.10612l18.56055,-18.56055l-18.56055,-18.56055z"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!--   MODAL -->
+      <div
+        x-show="showModal"
+        @click="if(event.target.classList.contains('modal-add')) showModal=false"
+        class="modal-add absolute top-0 left-0 w-full h-screen"
+      >
+        <div
+          class="rounded-t-md container mx-auto mt-16 bg-white w-2/4"
+          x-show="showModal"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0 transform scale-90"
+          x-transition:enter-end="opacity-100 transform scale-100"
+          x-transition:leave="transition ease-in duration-300"
+          x-transition:leave-start="opacity-100 transform scale-100"
+          x-transition:leave-end="opacity-0 transform scale-90"
+        >
+          <div
+            class="
+              rounded-t-md
+              nav-color
+              bg-green-600
+              p-3
+              mb-3
+              flex
+              items-center
+              justify-between
+            "
+          >
+            <h1 class="font-bold text-white text-xl">ADD TO-DO</h1>
+            <div class="text-sm">
+              <svg
+                @click="addTodo"
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="30"
+                height="30"
+                viewBox="0 0 172 172"
+                style="fill: #000000"
+              >
+                <g
+                  fill="none"
+                  fill-rule="nonzero"
+                  stroke="none"
+                  stroke-width="1"
+                  stroke-linecap="butt"
+                  stroke-linejoin="miter"
+                  stroke-miterlimit="10"
+                  stroke-dasharray=""
+                  stroke-dashoffset="0"
+                  font-family="none"
+                  font-weight="none"
+                  font-size="none"
+                  text-anchor="none"
+                  style="mix-blend-mode: normal"
+                >
+                  <path d="M0,172v-172h172v172z" fill="none"></path>
+                  <g fill="#ffffff">
+                    <path
+                      d="M86,14.33333c-39.5815,0 -71.66667,32.08517 -71.66667,71.66667c0,39.5815 32.08517,71.66667 71.66667,71.66667c39.5815,0 71.66667,-32.08517 71.66667,-71.66667c0,-39.5815 -32.08517,-71.66667 -71.66667,-71.66667zM71.66667,124.80033l-33.7335,-33.7335l10.13367,-10.13367l23.59983,23.59983l52.2665,-52.2665l10.13367,10.13367z"
+                    ></path>
+                  </g>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div class="flex flex-col p-2">
+            <input
+              x-model="todoTitle"
+              @focus="hasNoTodoTitle=false"
+              @keydown.enter="finishTyping(event,todoFormsIndex)"
+              type="text"
+              :class="{'border border-red-200 bg-red-100 shake' : hasNoTodoTitle}"
+              class="p-1 focus:bg-green-100"
+              id="todo-title-tb"
+              placeholder="Title here..."
+            />
+            <div class="mt-2">
+              <div class="flex items-center justify-between">
+                <h1 class="todo-here-label text-xl">todo list</h1>
+                <svg
+                  @click="addTodoForm(todoFormsIndex)"
+                  xmlns="http://www.w3.org/2000/svg"
+                  x="0px"
+                  y="0px"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 172 172"
+                  style="fill: #000000"
+                >
+                  <g
+                    fill="none"
+                    fill-rule="nonzero"
+                    stroke="none"
+                    stroke-width="1"
+                    stroke-linecap="butt"
+                    stroke-linejoin="miter"
+                    stroke-miterlimit="10"
+                    stroke-dasharray=""
+                    stroke-dashoffset="0"
+                    font-family="none"
+                    font-weight="none"
+                    font-size="none"
+                    text-anchor="none"
+                    style="mix-blend-mode: normal"
+                  >
+                    <path d="M0,172v-172h172v172z" fill="none"></path>
+                    <g fill="#578DAF">
+                      <path
+                        d="M137.6,22.93333h-103.2c-6.33533,0 -11.46667,5.13133 -11.46667,11.46667v103.2c0,6.33533 5.13133,11.46667 11.46667,11.46667h103.2c6.33533,0 11.46667,-5.13133 11.46667,-11.46667v-103.2c0,-6.33533 -5.13133,-11.46667 -11.46667,-11.46667zM120.4,91.73333h-28.66667v28.66667c0,3.17053 -2.56853,5.73333 -5.73333,5.73333c-3.1648,0 -5.73333,-2.5628 -5.73333,-5.73333v-28.66667h-28.66667c-3.1648,0 -5.73333,-2.5628 -5.73333,-5.73333c0,-3.17053 2.56853,-5.73333 5.73333,-5.73333h28.66667v-28.66667c0,-3.17053 2.56853,-5.73333 5.73333,-5.73333c3.1648,0 5.73333,2.5628 5.73333,5.73333v28.66667h28.66667c3.1648,0 5.73333,2.5628 5.73333,5.73333c0,3.17053 -2.56853,5.73333 -5.73333,5.73333z"
+                      ></path>
+                    </g>
+                  </g>
+                </svg>
+              </div>
+              <template
+                class="add-list-container mt-2 flex flex-col"
+                x-for="(todo, index) in todoForm"
+              >
+                <div class="todo-textbox flex items-center">
+                  <input
+                    x-model="todoForm[index]"
+                    @keydown.enter="finishTyping(event,todoFormsIndex)"
+                    type="text"
+                    class="todo-forms p-1 flex-1 focus:bg-green-100 mr-1"
+                    placeholder="todo here..."
+                  />
+                  <svg
+                    @click="deleteTodoForm(index)"
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 172 172"
+                    style="fill: #000000"
+                  >
+                    <g
+                      fill="none"
+                      fill-rule="nonzero"
+                      stroke="none"
+                      stroke-width="1"
+                      stroke-linecap="butt"
+                      stroke-linejoin="miter"
+                      stroke-miterlimit="10"
+                      stroke-dasharray=""
+                      stroke-dashoffset="0"
+                      font-family="none"
+                      font-weight="none"
+                      font-size="none"
+                      text-anchor="none"
+                      style="mix-blend-mode: normal"
+                    >
+                      <path d="M0,172v-172h172v172z" fill="none"></path>
+                      <g fill="#e74c3c">
+                        <path
+                          d="M40.13333,22.93333c-1.46702,0 -2.93565,0.55882 -4.05365,1.67969l-11.46667,11.46667c-2.24173,2.24173 -2.24173,5.87129 0,8.10729l41.81302,41.81302l-41.81302,41.81302c-2.24173,2.24173 -2.24173,5.87129 0,8.10729l11.46667,11.46667c2.24173,2.24173 5.87129,2.24173 8.10729,0l41.81302,-41.81302l41.81302,41.81302c2.236,2.24173 5.87129,2.24173 8.10729,0l11.46667,-11.46667c2.24173,-2.24173 2.24173,-5.87129 0,-8.10729l-41.81302,-41.81302l41.81302,-41.81302c2.24173,-2.236 2.24173,-5.87129 0,-8.10729l-11.46667,-11.46667c-2.24173,-2.24173 -5.87129,-2.24173 -8.10729,0l-41.81302,41.81302l-41.81302,-41.81302c-1.12087,-1.12087 -2.58663,-1.67969 -4.05365,-1.67969z"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- partial -->
+    <script src="./script.js"></script>
+  </body>
+</html>

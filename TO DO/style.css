@@ -1,0 +1,69 @@
+body{
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.3) ),url(https://images.pexels.com/photos/1226398/pexels-photo-1226398.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940);
+  background-position: center  ;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  
+}
+
+.glass-bg{
+   background-color: rgba(255, 255, 255, 1.8);
+  backdrop-filter: blur(5px);
+ 
+}
+
+.modal-add{
+  background: rgba(0,0,0,0.3)
+}
+
+.add-todo{
+  background-color: rgb(47, 255, 0);
+}
+
+.todo-here-label{
+  color: rgba(0,0,0,0.8);
+}
+
+.black-05{
+  color: rgba(0,0,0,0.8);
+}
+
+/* .black-03{
+  /* color: rgba(0,0,0,0.3); 
+} */
+
+.black-btn-blue{
+  background-color: rgb(87, 141, 175);
+}
+
+.nav-color{
+  background-image: linear-gradient(to right,#B8D0FD,#4883A3);
+}
+
+.todo-hover{
+  transition: 0.1s linear;
+}
+
+.todo-hover:hover{
+  background-color: rgba(0,0,0,0.1);
+  color: #000000;
+}
+
+.completed-remaining-text{
+  color: rgba(0,0,0,0.6)
+}
+
+.shake{
+  animation-name: shake;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in;
+}
+
+
+@keyframes shake{
+    0%   {transform: translateX(0px);}
+  25%  {transform: translateX(2px);}
+  50%  {transform: translateX(-4px);}
+  100% {transform: translateX(2px);}
+}
