@@ -500,6 +500,7 @@ body.dark-theme {
 @media screen and (max-width: 360px) {
   .svg__img {
     width: 100%;
+    order: -1;
   }
   .section {
     padding: 3.5rem 0 1rem;
